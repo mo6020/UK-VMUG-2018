@@ -8,19 +8,19 @@ variable "vc_datacentre" {}
 
 // default VM Template
 variable "vm_template" {
-  default = "centos7-template"
+  default = "centos7-min-x86_64-patched-noroot-puppet"
 }
 // default VM folder
 variable "vm_folder" {
-  default = "Testing/SE-EMORGAN-Terraform"
+  default = "Experimental VMs"
 }
 // default VM network
 variable "vm_network" {
-  default = "VLAN56_Servers_Test"
+  default = "UserVMs-Linux - v1048"
 }
 // default datastore
 variable "vm_datastore" {
-  default = "pure-emea"
+  default = "emea2-personal-dsc"
 }
 
 variable "ssh_key_public" {

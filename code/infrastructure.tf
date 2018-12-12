@@ -1,56 +1,113 @@
-// Set up the vSphere provider
 provider "vsphere" {
+  user           = "${var.vc_user}"
+  password       = "${var.vc_password}"
   vsphere_server = "${var.vc_server}"
-  user = "${var.vc_user}"
-  password = "${var.vc_password}"
-// Allow self-signed SSL certs
+
+  # If you have a self-signed cert
   allow_unverified_ssl = true
 }
 
-// Build first VM
-resource "vsphere_virtual_machine" "tf-test-nginx" {
-  name = "tf-test-nginx"
-  vcpu = 1
-  memory = 1024
-  domain = "${var.vc_domain}"
-  datacenter = "${var.vc_datacentre}"
-  cluster = "${var.vc_cluster}"
-  folder = "${var.vm_folder}"
-  time_zone = "Europe/London"
+data "vsphere_datacenter" "dc" {
+  name = "${var.vc_datacentre}"
+}
 
-// Network settings
+data "vsphere_datastore" "datastore" {
+  name          = "${var.vm_datastore}"
+  datacenter_id = "${data.vsphere_datacenter.dc.id}"
+}
+
+data "vsphere_resource_pool" "pool" {
+  name          = "Resources"
+  datacenter_id = "${data.vsphere_datacenter.dc.id}"
+}
+
+data "vsphere_network" "network" {
+  name          = "${var.vm_network}"
+  datacenter_id = "${data.vsphere_datacenter.dc.id}"
+}
+
+data "vsphere_virtual_machine" "template" {
+  name          = "${var.vm_template}"
+  datacenter_id = "${data.vsphere_datacenter.dc.id}"
+}
+
+resource "vsphere_virtual_machine" "vmug-nginx" {
+  name             = "vmug-nginx"
+  resource_pool_id = "${data.vsphere_resource_pool.pool.id}"
+  datastore_id     = "${data.vsphere_datastore.datastore.id}"
+
+  num_cpus = 2
+  memory   = 1024
+  guest_id = "${data.vsphere_virtual_machine.template.guest_id}"
+  scsi_type = "${data.vsphere_virtual_machine.template.scsi_type}"
+
   network_interface {
-    label = "${var.vm_network}"
-// lab is dhcp by default
+    network_id = "${data.vsphere_network.network.id}"
+    //adapter_type = "vmxnet3"
   }
 
-  // disks
   disk {
-    template = "${var.vm_template}"
-    datastore = "${var.vm_datastore}"
-    type = "thin"
+    label = "disk0"
+    size             = "${data.vsphere_virtual_machine.template.disks.0.size}"
+    eagerly_scrub    = "${data.vsphere_virtual_machine.template.disks.0.eagerly_scrub}"
+    thin_provisioned = "${data.vsphere_virtual_machine.template.disks.0.thin_provisioned}"
+    }
+
+  clone {
+    template_uuid = "${data.vsphere_virtual_machine.template.id}"
+  }
+
+}
+
+
+resource "vsphere_virtual_machine" "vmug-mysql" {
+  name             = "vmug-mysql"
+  resource_pool_id = "${data.vsphere_resource_pool.pool.id}"
+  datastore_id     = "${data.vsphere_datastore.datastore.id}"
+
+  num_cpus = 2
+  memory   = 1024
+  guest_id = "${data.vsphere_virtual_machine.template.guest_id}"
+  scsi_type = "${data.vsphere_virtual_machine.template.scsi_type}"
+
+  network_interface {
+    network_id = "${data.vsphere_network.network.id}"
+    //adapter_type = "vmxnet3"
+  }
+
+  disk {
+    label = "disk0"
+    size             = "${data.vsphere_virtual_machine.template.disks.0.size}"
+    eagerly_scrub    = "${data.vsphere_virtual_machine.template.disks.0.eagerly_scrub}"
+    thin_provisioned = "${data.vsphere_virtual_machine.template.disks.0.thin_provisioned}"
+  }
+  clone {
+    template_uuid = "${data.vsphere_virtual_machine.template.id}"
   }
 }
-// build second VM
-resource "vsphere_virtual_machine" "tf-test-mysql" {
-  name = "tf-test-mysql"
-  vcpu = 1
-  memory = 1024
-  domain = "${var.vc_domain}"
-  datacenter = "${var.vc_datacentre}"
-  cluster = "${var.vc_cluster}"
-  folder = "${var.vm_folder}"
-  time_zone = "Europe/London"
 
-// Network settings
+resource "vsphere_virtual_machine" "vmug-elk" {
+  name             = "vmug-elk"
+  resource_pool_id = "${data.vsphere_resource_pool.pool.id}"
+  datastore_id     = "${data.vsphere_datastore.datastore.id}"
+
+  num_cpus = 4
+  memory   = 4096
+  guest_id = "${data.vsphere_virtual_machine.template.guest_id}"
+  scsi_type = "${data.vsphere_virtual_machine.template.scsi_type}"
+
   network_interface {
-    label = "${var.vm_network}"
-// lab is dhcp by default
+    network_id = "${data.vsphere_network.network.id}"
+    //adapter_type = "vmxnet3"
   }
-  // disks
+
   disk {
-    template = "${var.vm_template}"
-    datastore = "${var.vm_datastore}"
-    type = "thin"
+    label = "disk0"
+    size             = "${data.vsphere_virtual_machine.template.disks.0.size}"
+    eagerly_scrub    = "${data.vsphere_virtual_machine.template.disks.0.eagerly_scrub}"
+    thin_provisioned = "${data.vsphere_virtual_machine.template.disks.0.thin_provisioned}"  
+    }
+  clone {
+    template_uuid = "${data.vsphere_virtual_machine.template.id}"
   }
 }

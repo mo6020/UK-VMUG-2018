@@ -20,7 +20,7 @@ variable "vm_network" {
 }
 // default datastore
 variable "vm_datastore" {
-  default = "emea2-personal-dsc"
+  default = "emea2-shared01"
 }
 
 variable "ssh_key_public" {

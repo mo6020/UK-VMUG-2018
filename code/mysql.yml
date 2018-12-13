@@ -1,0 +1,7 @@
+---
+- hosts: db
+  roles:
+      - role: geerlingguy.mysql
+        vars_files:
+        - vars/main.yml
+        become: yes

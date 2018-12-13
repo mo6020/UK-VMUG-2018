@@ -23,7 +23,7 @@
     - name: copy the content of the web site
       copy:
         src: /Users/ed/Repositories/UK-VMUG-2018/code/static-site-src/
-        dest: /home/root/static-site
+        dest: /home/ubuntu/static-site
     - name: restart nginx
       service:
         name: nginx

@@ -1,5 +1,5 @@
-# UK-VMUG-2018
-Repo for UK VMUG presentation and demo.
+# UK VMUG 2018
+Repo for UK VMUG presentation and demo at the National Space Center.
 
 Didn't end up using the Terraform as didn't have time to refactor it to AWS after discovering my permissions were goosed in the Rubrik SE lab..
 
